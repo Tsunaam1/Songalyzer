@@ -90910,7 +90910,21 @@ function objectToString(o) {
 }).call(this)}).call(this,{"isBuffer":require("../../../../../../../../AppData/Roaming/npm/node_modules/browserify/node_modules/is-buffer/index.js")})
 },{"../../../../../../../../AppData/Roaming/npm/node_modules/browserify/node_modules/is-buffer/index.js":158}],437:[function(require,module,exports){
 (function (Buffer){(function (){
-var privateKey = new Buffer("abcdef00", "hex")
+/* When the user scrolls down, hide the navbar. When the user scrolls up, show the navbar */
+var prevScrollpos = window.pageYOffset
+window.onscroll = function () {
+  var currentScrollPos = window.pageYOffset
+  if (prevScrollpos > currentScrollPos) {
+    document.getElementById("header").style.top = "0"
+    document.getElementById("trackinfo").style.top = "100px"
+  } else {
+    document.getElementById("header").style.top = "-83px"
+    document.getElementById("trackinfo").style.top = "1em"
+  }
+  prevScrollpos = currentScrollPos
+}
+
+var privateKey = new Buffer("abcdef000", "hex")
 console.log(privateKey.toString("hex"))
 var request = require("request")
 const APIController = (function () {
@@ -91017,7 +91031,7 @@ const UIController = (function () {
     searchTracks: "#searchtracks",
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
-    hfToken: "#hidden_token",
+    mainText: "#maintext",
   }
   return {
     inputField() {
@@ -91025,6 +91039,7 @@ const UIController = (function () {
         search: document.querySelector(DOMElements.searchTracks),
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
+        mainText: document.querySelector(DOMElements.mainText),
       }
     },
     createTrack(artist, name, img, id) {
@@ -91057,6 +91072,7 @@ const UIController = (function () {
     ) {
       const detailDiv = document.querySelector(DOMElements.divTrackInfo)
       detailDiv.innerHTML = ""
+      detailDiv.style.display = "initial"
       const prevmp3 = mp3
       if (prevmp3 == null) {
         const html = `<div id="basicinfo">
@@ -91089,19 +91105,19 @@ const UIController = (function () {
           <h2>${tempoInt}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Popularity</h3>
+          <h3 id="boxtext">Popularita</h3>
           <h2>${popularity}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Explicit</h3>
+          <h3 id="boxtext">Explicitní </h3>
           <h2>${explicity}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Duration</h3>
+          <h3 id="boxtext">Délka</h3>
           <h2>${time}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Release date</h3>
+          <h3 id="boxtext">Datum vydání</h3>
           <h2>${release_date}</h2>
         </div>
       </div>`
@@ -91141,19 +91157,19 @@ const UIController = (function () {
           <h2>${tempoInt}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Popularity</h3>
+          <h3 id="boxtext">Popularita</h3>
           <h2>${popularity}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Explicit</h3>
+          <h3 id="boxtext">Explicitní</h3>
           <h2>${explicity}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Duration</h3>
+          <h3 id="boxtext">Délka</h3>
           <h2>${time}</h2>
         </div>
         <div class="box">
-          <h3 id="boxtext">Release date</h3>
+          <h3 id="boxtext">Datum vydání</h3>
           <h2>${release_date}</h2>
         </div>
       </div>`
@@ -91165,6 +91181,9 @@ const UIController = (function () {
     },
     resetTrackList() {
       this.inputField().tracks.innerHTML = ""
+    },
+    deleteMainText() {
+      this.inputField().mainText.innerHTML = ""
     },
     storeToken(value) {
       document.querySelector(DOMElements.hfToken).value = value
@@ -91181,6 +91200,7 @@ const APPController = (function (UICtrl, APICtrl) {
   const DOMInputs = UICtrl.inputField()
   DOMInputs.search.addEventListener("input", async (e) => {
     UICtrl.resetTrackList()
+    UICtrl.deleteMainText()
     const token = sessionStorage.getItem("accessTok")
     console.log("Token: ", sessionStorage.getItem("accessTok"))
     const searchinput = document.getElementById("searchtracks").value
@@ -91225,6 +91245,12 @@ const APPController = (function (UICtrl, APICtrl) {
     const tempoInt = ~~(tempo + 0.5)
     const time = track.duration_ms - 1000
     const timeCon = convertMsToTime(time)
+    let expl = track.explicit
+    if (expl == true) {
+      expl = "Ano"
+    } else {
+      expl = "Ne"
+    }
     let artists = ""
     for (var i = 0; i < track.artists.length; i++) {
       if (i == 0) {
@@ -91241,7 +91267,7 @@ const APPController = (function (UICtrl, APICtrl) {
       track.external_urls.spotify,
       track.album.release_date,
       track.popularity,
-      track.explicit,
+      expl,
       timeCon,
       track.album.name,
       tempoInt
