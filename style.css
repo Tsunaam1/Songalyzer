@@ -10,7 +10,7 @@ html {
 }
 body {
   position: relative;
-  background-color: #333;
+  background-color: #111;
   font-family: "Courier New", Courier, monospace;
   overflow-x: hidden;
   font-family: "Exo 2", sans-serif;
@@ -40,12 +40,28 @@ a {
 header > nav {
   margin: 0.5em 2em;
 }
+#main {
+  background-color: #333;
+}
 #logo {
-  height: 4em;
-  margin: 0.5em 2em;
+  height: 3em;
+  margin: 1em 2em 0.5em 2em;
+}
+#maintext {
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  color: #fff;
+  font-size: 2em;
+  text-align: center;
+}
+#logomaintext {
+  align-self: center;
+  height: 5em;
 }
 #searchtracks {
-  background-color: #555;
+  border-radius: 20px;
+  background-color: #333;
   color: #fff;
   box-sizing: border-box;
   width: 100%;
@@ -85,7 +101,6 @@ header > nav {
   border-radius: 10px;
 }
 #trackinfo {
-  display: none;
   position: sticky;
   background-color: #222;
   border-radius: 10px;
@@ -138,6 +153,19 @@ header > nav {
 }
 #boxtext {
   color: #aaa;
+}
+#socialmedia {
+  display: flex;
+  align-items: center;
+}
+.socialmediaitem {
+  cursor: pointer;
+  filter: grayscale(1);
+  transition: all 0.5s ease-out;
+  margin: 0 10px 0 10px;
+}
+.socialmediaitem:hover {
+  filter: none;
 }
 /* #copyright {
   position: absolute;

@@ -91032,6 +91032,7 @@ const UIController = (function () {
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
     mainText: "#maintext",
+    trackStuff: "#trackstuff",
   }
   return {
     inputField() {
@@ -91040,6 +91041,7 @@ const UIController = (function () {
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
         mainText: document.querySelector(DOMElements.mainText),
+        trackStuff: document.querySelector(DOMElements.trackStuff),
       }
     },
     createTrack(artist, name, img, id) {
@@ -91183,7 +91185,10 @@ const UIController = (function () {
       this.inputField().tracks.innerHTML = ""
     },
     deleteMainText() {
-      this.inputField().mainText.innerHTML = ""
+      this.inputField().mainText.style.display = "none"
+    },
+    showTrackStuff() {
+      this.inputField().trackStuff.style.display = "flex"
     },
     storeToken(value) {
       document.querySelector(DOMElements.hfToken).value = value
@@ -91199,6 +91204,7 @@ const UIController = (function () {
 const APPController = (function (UICtrl, APICtrl) {
   const DOMInputs = UICtrl.inputField()
   DOMInputs.search.addEventListener("input", async (e) => {
+    UICtrl.showTrackStuff()
     UICtrl.resetTrackList()
     UICtrl.deleteMainText()
     const token = sessionStorage.getItem("accessTok")
