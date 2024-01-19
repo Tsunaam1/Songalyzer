@@ -91224,7 +91224,7 @@ const APPController = (function (UICtrl, APICtrl) {
           artists = artists + ", " + el.artists[i].name
         }
       }
-      UICtrl.createTrack(artists, el.name, el.album.images[1].url, el.id)
+      UICtrl.createTrack(artists, el.name, el.album.images[2].url, el.id)
     })
   })
   DOMInputs.tracks.addEventListener("click", async (e) => {

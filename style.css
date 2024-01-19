@@ -18,7 +18,7 @@ body {
 header {
   position: sticky;
   display: flex;
-  background-color: #000;
+  background-color: #111;
   align-items: center;
   justify-content: space-between;
   transition: top 0.3s;
@@ -44,15 +44,15 @@ header > nav {
   background-color: #333;
 }
 #logo {
-  height: 3em;
+  height: 2.5em;
   margin: 1em 2em 0.5em 2em;
 }
 #maintext {
   display: flex;
   flex-direction: column;
-  padding: 1em;
+  padding: 1em 0 0;
   color: #fff;
-  font-size: 2em;
+  font-size: 1.2em;
   text-align: center;
 }
 #logomaintext {
@@ -64,9 +64,10 @@ header > nav {
   background-color: #333;
   color: #fff;
   box-sizing: border-box;
-  width: 100%;
-  font-size: 2.3em;
+  width: 80vh;
+  font-size: 1.6em;
   padding: 6px;
+  border: #555 solid 3px;
 }
 #trackstuff {
   display: flex;
@@ -82,10 +83,10 @@ header > nav {
   cursor: pointer;
   display: grid;
   border-radius: 10px;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 60px 1fr;
   border: #222 1px solid;
   padding: 0.4em;
-  font-size: 2.5em;
+  font-size: 1.2em;
   align-items: center;
   justify-content: start;
   color: #fff;
@@ -93,7 +94,7 @@ header > nav {
 }
 .track:hover {
   background-color: #555;
-  transform: scale(1.01);
+  transform: scale(1.03);
 }
 .track > img {
   width: 2.5em;
@@ -116,19 +117,23 @@ header > nav {
   box-shadow: -1px 0px 63px -32px rgba(0, 0, 0, 0.65);
 }
 #basicinfo > img {
+  width: 15em;
   border: 15px outset #000000;
   -webkit-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   -moz-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
 }
 #basicinfo > h1 {
-  font-size: 3em;
+  font-size: 2em;
 }
 #basicinfo > h2 {
   margin: 0 0 20px 0;
 }
 #basicinfo > audio {
   margin-right: 1em;
+}
+#basicinfo > a > svg {
+  width: 2.2em;
 }
 .trackitem {
   text-decoration: none;
@@ -142,17 +147,18 @@ header > nav {
 .box {
   display: grid;
   background-color: #444;
-  grid-template-rows: 25px 1fr;
+  grid-template-rows: 20px 1fr;
   justify-content: center;
   align-items: center;
-  width: 100px;
-  height: 60px;
+  width: 80px;
+  height: 50px;
   border: 3px outset #fff;
-  padding: 1em 2em 1em 2em;
+  padding: 0.5em 2em 0.5em 2em;
   margin: 1em;
 }
 #boxtext {
   color: #aaa;
+  font-size: 1em;
 }
 #socialmedia {
   display: flex;
