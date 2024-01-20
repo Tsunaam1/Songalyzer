@@ -101,7 +101,7 @@ header > nav {
   margin-right: 0;
   border-radius: 10px;
 }
-#trackinfo {
+div#trackinfo {
   position: sticky;
   background-color: #222;
   border-radius: 10px;
@@ -135,9 +135,47 @@ header > nav {
 #basicinfo > a > svg {
   width: 2.2em;
 }
+#artistinfoparent {
+  display: flex;
+  height: 15em;
+  background-color: #333;
+  border-radius: 15px;
+  margin-top: 1em;
+}
+#artistinfotext {
+  display: flex;
+  justify-content: start;
+  flex-wrap: wrap;
+  align-content: start;
+  flex-direction: column;
+}
+#artistinfo {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  height: 15em;
+}
+#artistimg {
+  height: 15em;
+  border-radius: 0 15px 15px 0;
+}
 .trackitem {
   text-decoration: none;
   color: #fff;
+}
+.artistinfoheader {
+  text-align: start;
+  margin-left: 0.5em;
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 0.5em;
+}
+.artistinfotext {
+  color: #bbb;
+  font-size: 1em;
+  text-align: start;
+  margin-top: 0.6em;
+  margin-left: 1em;
 }
 #details {
   display: flex;

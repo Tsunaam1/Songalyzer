@@ -90916,14 +90916,13 @@ window.onscroll = function () {
   var currentScrollPos = window.pageYOffset
   if (prevScrollpos > currentScrollPos) {
     document.getElementById("header").style.top = "0"
-    document.getElementById("trackinfo").style.top = "100px"
+    document.getElementById("trackinfo").style.top = "75px"
   } else {
     document.getElementById("header").style.top = "-83px"
-    document.getElementById("trackinfo").style.top = "1em"
+    document.getElementById("trackinfo").style.top = "0.5em"
   }
   prevScrollpos = currentScrollPos
 }
-
 var privateKey = new Buffer("abcdef000", "hex")
 console.log(privateKey.toString("hex"))
 var request = require("request")
@@ -91004,6 +91003,18 @@ const APIController = (function () {
       }
     )
   }
+  const _getArtist = async (token, artistID) => {
+    const result = await fetch(
+      `https://api.spotify.com/v1/artists/${artistID}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+    const data = await result.json()
+    return data
+  }
   return {
     getToken() {
       return _getToken()
@@ -91022,6 +91033,9 @@ const APIController = (function () {
     },
     getLyrics(token, trackID) {
       return _getLyrics(token, trackID)
+    },
+    getArtist(token, artistID) {
+      return _getArtist(token, artistID)
     },
   }
 })()
@@ -91070,7 +91084,13 @@ const UIController = (function () {
       explicity,
       time,
       album_name,
-      tempoInt
+      tempoInt,
+      artist_name,
+      artist_followers,
+      artist_popularity,
+      artist_genres,
+      artist_url,
+      artist_img
     ) {
       const detailDiv = document.querySelector(DOMElements.divTrackInfo)
       detailDiv.innerHTML = ""
@@ -91085,8 +91105,10 @@ const UIController = (function () {
         <h1>${title}</h1>
         <h3>${album_name}</h3>
         <h2>${artist}</h2>
-        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <a href="${url}" target="_blank"
+        <!--?xml version="1.0" encoding="UTF-8" standalone="no"?-->
+        <a
+          href="${url}"
+          target="_blank"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             height="40px"
@@ -91097,59 +91119,7 @@ const UIController = (function () {
             <path
               fill="#1ED760"
               d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739z"
-            />
-          </svg>
-        </a>
-      </div>
-      <div id="details">
-        <div class="box">
-          <h3 id="boxtext">BPM</h3>
-          <h2>${tempoInt}</h2>
-        </div>
-        <div class="box">
-          <h3 id="boxtext">Popularita</h3>
-          <h2>${popularity}</h2>
-        </div>
-        <div class="box">
-          <h3 id="boxtext">Explicitní </h3>
-          <h2>${explicity}</h2>
-        </div>
-        <div class="box">
-          <h3 id="boxtext">Délka</h3>
-          <h2>${time}</h2>
-        </div>
-        <div class="box">
-          <h3 id="boxtext">Datum vydání</h3>
-          <h2>${release_date}</h2>
-        </div>
-      </div>`
-        detailDiv.insertAdjacentHTML("beforeend", html)
-      } else {
-        const html = `<div id="basicinfo">
-        <img
-          src="${img}"
-          alt="TrackInfo Img"
-        />
-        <h1>${title}</h1>
-        <h3>${album_name}</h3>
-        <h2>${artist}</h2>
-        <audio controls>
-          <source src="${mp3}" type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
-        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <a href="${url}" target="_blank"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="40px"
-            width="40px"
-            version="1.1"
-            viewBox="0 0 168 168"
-          >
-            <path
-              fill="#1ED760"
-              d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739z"
-            />
+            ></path>
           </svg>
         </a>
       </div>
@@ -91174,7 +91144,110 @@ const UIController = (function () {
           <h3 id="boxtext">Datum vydání</h3>
           <h2>${release_date}</h2>
         </div>
-      </div>`
+      </div>
+      <div id="artistinfoparent">
+            <div id="artistinfotext">
+              <p class="artistinfoheader">${artist_name}</p>
+              <p class="artistinfotext" id="followers">
+                Počet sledujících: ${artist_followers}
+              </p>
+              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}</p>
+              <p class="artistinfotext">
+                Žánry: ${artist_genres}
+              </p>
+            </div>
+            <div id="artistinfo">
+              <a
+                href="${artist_url}"
+                target="_blank"
+                ><img
+                  src="${artist_img}"
+                  alt="Artist Image"
+                  id="artistimg"
+              /></a>
+            </div>
+          </div>
+          <br /><br /><br /><br /><br />`
+        detailDiv.insertAdjacentHTML("beforeend", html)
+      } else {
+        const html = `<div id="basicinfo">
+        <img
+          src="${img}"
+          alt="TrackInfo Img"
+        />
+        <h1>${title}</h1>
+        <h3>${album_name}</h3>
+        <h2>${artist}</h2>
+        <audio controls="">
+          <source
+            src="${mp3}"
+            type="audio/mpeg"
+          />
+          Your browser does not support the audio element.
+        </audio>
+        <!--?xml version="1.0" encoding="UTF-8" standalone="no"?-->
+        <a
+          href="${url}"
+          target="_blank"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="40px"
+            width="40px"
+            version="1.1"
+            viewBox="0 0 168 168"
+          >
+            <path
+              fill="#1ED760"
+              d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739z"
+            ></path>
+          </svg>
+        </a>
+      </div>
+      <div id="details">
+        <div class="box">
+          <h3 id="boxtext">BPM</h3>
+          <h2>${tempoInt}</h2>
+        </div>
+        <div class="box">
+          <h3 id="boxtext">Popularita</h3>
+          <h2>${popularity}</h2>
+        </div>
+        <div class="box">
+          <h3 id="boxtext">Explicitní</h3>
+          <h2>${explicity}</h2>
+        </div>
+        <div class="box">
+          <h3 id="boxtext">Délka</h3>
+          <h2>${time}</h2>
+        </div>
+        <div class="box">
+          <h3 id="boxtext">Datum vydání</h3>
+          <h2>${release_date}</h2>
+        </div>
+      </div>
+      <div id="artistinfoparent">
+            <div id="artistinfotext">
+              <p class="artistinfoheader">${artist_name}</p>
+              <p class="artistinfotext" id="followers">
+                Počet sledujících: ${artist_followers}
+              </p>
+              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}</p>
+              <p class="artistinfotext">
+                Žánry: ${artist_genres}
+              </p>
+            </div>
+            <div id="artistinfo">
+              <a
+                href="${artist_url}"
+                target="_blank"
+                ><img
+                  src="${artist_img}"
+                  alt="Artist Image"
+                  id="artistimg"
+              /></a>
+            </div>
+          </div>
+          <br /><br /><br /><br /><br />`
         detailDiv.insertAdjacentHTML("beforeend", html)
       }
     },
@@ -91265,6 +91338,17 @@ const APPController = (function (UICtrl, APICtrl) {
         artists = artists + ", " + track.artists[i].name
       }
     }
+    const artistID = track.artists[0].id
+    const artistData = await APICtrl.getArtist(token, artistID)
+    let genres = ""
+    for (var i = 0; i < artistData.genres.length; i++) {
+      if (i == 0) {
+        genres = genres + artistData.genres[i]
+      } else {
+        genres = genres + ", " + artistData.genres[i]
+      }
+    }
+    console.log(artistData)
     UICtrl.createTrackInfo(
       track.album.images[1].url,
       track.name,
@@ -91276,7 +91360,13 @@ const APPController = (function (UICtrl, APICtrl) {
       expl,
       timeCon,
       track.album.name,
-      tempoInt
+      tempoInt,
+      artistData.name,
+      artistData.followers.total,
+      artistData.popularity,
+      genres,
+      artistData.external_urls.spotify,
+      artistData.images[1].url
     )
   })
 
