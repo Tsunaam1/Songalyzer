@@ -165,11 +165,15 @@ div#artistinfotext {
   color: #fff;
 }
 .artistinfoheader {
+  width: 0;
   text-align: start;
   margin-left: 0.5em;
   font-size: 2em;
   font-weight: bold;
   margin-top: 0.5em;
+}
+.artistinfoheader > p:hover {
+  text-decoration: underline;
 }
 .artistinfotext {
   color: #bbb;

@@ -91147,7 +91147,12 @@ const UIController = (function () {
       </div>
       <div id="artistinfoparent">
             <div id="artistinfotext">
-              <p class="artistinfoheader">${artist_name}</p>
+              <a
+                href="${artist_url}"
+                target="_blank"
+                class="artistinfoheader"
+                ><p>${artist_name}</p></a
+              >
               <p class="artistinfotext" id="followers">
                 Počet sledujících: ${artist_followers}
               </p>
@@ -91227,7 +91232,12 @@ const UIController = (function () {
       </div>
       <div id="artistinfoparent">
             <div id="artistinfotext">
-              <p class="artistinfoheader">${artist_name}</p>
+              <a
+                href="${artist_url}"
+                target="_blank"
+                class="artistinfoheader"
+                ><p>${artist_name}</p></a
+              >
               <p class="artistinfotext" id="followers">
                 Počet sledujících: ${artist_followers}
               </p>
@@ -91348,6 +91358,12 @@ const APPController = (function (UICtrl, APICtrl) {
         genres = genres + ", " + artistData.genres[i]
       }
     }
+    let artistImg = artistData.images
+    if (artistImg == "") {
+      artistImg = "img/musician.webp"
+    } else {
+      artistImg = artistData.images[1].url
+    }
     console.log(artistData)
     UICtrl.createTrackInfo(
       track.album.images[1].url,
@@ -91366,7 +91382,7 @@ const APPController = (function (UICtrl, APICtrl) {
       artistData.popularity,
       genres,
       artistData.external_urls.spotify,
-      artistData.images[1].url
+      artistImg
     )
   })
 
