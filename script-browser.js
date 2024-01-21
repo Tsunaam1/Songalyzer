@@ -91130,7 +91130,7 @@ const UIController = (function () {
         </div>
         <div class="box">
           <h3 id="boxtext">Popularita</h3>
-          <h2>${popularity}</h2>
+          <h2>${popularity}%</h2>
         </div>
         <div class="box">
           <h3 id="boxtext">Explicitní</h3>
@@ -91151,7 +91151,7 @@ const UIController = (function () {
               <p class="artistinfotext" id="followers">
                 Počet sledujících: ${artist_followers}
               </p>
-              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}</p>
+              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
               <p class="artistinfotext">
                 Žánry: ${artist_genres}
               </p>
@@ -91210,7 +91210,7 @@ const UIController = (function () {
         </div>
         <div class="box">
           <h3 id="boxtext">Popularita</h3>
-          <h2>${popularity}</h2>
+          <h2>${popularity}%</h2>
         </div>
         <div class="box">
           <h3 id="boxtext">Explicitní</h3>
@@ -91231,7 +91231,7 @@ const UIController = (function () {
               <p class="artistinfotext" id="followers">
                 Počet sledujících: ${artist_followers}
               </p>
-              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}</p>
+              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
               <p class="artistinfotext">
                 Žánry: ${artist_genres}
               </p>
