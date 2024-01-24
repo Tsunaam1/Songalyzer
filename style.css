@@ -102,6 +102,7 @@ header > nav {
   border-radius: 10px;
 }
 div#trackinfo {
+  scroll-behavior: smooth;
   overflow: scroll;
   position: sticky;
   background-color: #222;
@@ -123,6 +124,12 @@ div#trackinfo {
   -webkit-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   -moz-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
+}
+#basicinfo a {
+  color: #777;
+}
+#basicinfo a:hover {
+  color: #eee;
 }
 #basicinfo > h1 {
   font-size: 2em;
@@ -182,10 +189,66 @@ div#artistinfotext {
   margin-top: 0.6em;
   margin-left: 1em;
 }
+#albuminfoparent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 15em;
+  background-color: #333;
+  border-radius: 15px;
+  margin-top: 1em;
+}
+div#albuminfotext {
+  overflow: scroll;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: start;
+  align-content: start;
+  flex-direction: column;
+}
+.albuminfoheader {
+  width: 0;
+  text-align: start;
+  margin-left: 0.5em;
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 0.5em;
+}
+.albuminfoheader > p:hover {
+  text-decoration: underline;
+}
+#albuminfotext > a {
+  width: 8.5em;
+}
+#albuminfotext > a > p {
+  display: flex;
+  flex-direction: row;
+  font-size: 0.65em;
+}
+.albuminfotext {
+  color: #bbb;
+  font-size: 1em;
+  text-align: start;
+  margin-top: 0.6em;
+  margin-left: 1em;
+}
+#albuminfo {
+  display: flex;
+  justify-content: flex-end;
+  height: 15em;
+}
+#albumimg {
+  height: 15em;
+  border-radius: 0 15px 15px 0;
+}
 #details {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+}
+#albumcopyright {
+  color: #aaa;
+  text-align: start;
+  margin: 1em;
 }
 .box {
   display: grid;

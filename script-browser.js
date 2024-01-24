@@ -91003,6 +91003,18 @@ const APIController = (function () {
       }
     )
   }
+  const _getAlbum = async (token, albumID) => {
+    const result = await fetch(
+      `https://api.spotify.com/v1/albums/${albumID}?market=CZ`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+    const data = await result.json()
+    return data
+  }
   const _getArtist = async (token, artistID) => {
     const result = await fetch(
       `https://api.spotify.com/v1/artists/${artistID}`,
@@ -91033,6 +91045,9 @@ const APIController = (function () {
     },
     getLyrics(token, trackID) {
       return _getLyrics(token, trackID)
+    },
+    getAlbum(token, albumID) {
+      return _getAlbum(token, albumID)
     },
     getArtist(token, artistID) {
       return _getArtist(token, artistID)
@@ -91084,6 +91099,10 @@ const UIController = (function () {
       explicity,
       time,
       album_name,
+      album_tracks,
+      album_popularity,
+      album_url,
+      album_copyrights,
       tempoInt,
       artist_name,
       artist_followers,
@@ -91103,8 +91122,8 @@ const UIController = (function () {
           alt="TrackInfo Img"
         />
         <h1>${title}</h1>
-        <h3>${album_name}</h3>
-        <h2>${artist}</h2>
+        <h3><a href="${album_url}" target="_blank">${album_name}</a></h3>
+        <h2><a href="${artist_url}" target="_blank">${artist_name}</a></h2>
         <!--?xml version="1.0" encoding="UTF-8" standalone="no"?-->
         <a
           href="${url}"
@@ -91145,6 +91164,28 @@ const UIController = (function () {
           <h2>${release_date}</h2>
         </div>
       </div>
+      <div id="albuminfoparent">
+            <div id="albuminfotext">
+              <a
+                href="${album_url}"
+                target="_blank"
+                class="albuminfoheader"
+                ><p>${album_name}</p></a
+              >
+              <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
+              <p class="albuminfotext">Popularita: ${album_popularity}%</p>
+            </div>
+            <div id="albuminfo">
+              <a
+                href="${album_url}"
+                target="_blank"
+                ><img
+                  src="${img}"
+                  id="albumimg"
+                  alt=""
+              /></a>
+            </div>
+          </div>
       <div id="artistinfoparent">
             <div id="artistinfotext">
               <a
@@ -91172,6 +91213,9 @@ const UIController = (function () {
               /></a>
             </div>
           </div>
+          <div id="albumcopyright">
+            ${album_copyrights}
+          </div>
           <br /><br /><br /><br /><br />`
         detailDiv.insertAdjacentHTML("beforeend", html)
       } else {
@@ -91181,8 +91225,8 @@ const UIController = (function () {
           alt="TrackInfo Img"
         />
         <h1>${title}</h1>
-        <h3>${album_name}</h3>
-        <h2>${artist}</h2>
+        <h3><a href="${album_url}" target="_blank">${album_name}</a></h3>
+        <h2><a href="${artist_url}" target="_blank">${artist_name}</a></h2>
         <audio controls="">
           <source
             src="${mp3}"
@@ -91230,6 +91274,28 @@ const UIController = (function () {
           <h2>${release_date}</h2>
         </div>
       </div>
+      <div id="albuminfoparent">
+            <div id="albuminfotext">
+              <a
+                href="${album_url}"
+                target="_blank"
+                class="albuminfoheader"
+                ><p>${album_name}</p></a
+              >
+              <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
+              <p class="albuminfotext">Popularita: ${album_popularity}%</p>
+            </div>
+            <div id="albuminfo">
+              <a
+                href="${album_url}"
+                target="_blank"
+                ><img
+                  src="${img}"
+                  id="albumimg"
+                  alt=""
+              /></a>
+            </div>
+          </div>
       <div id="artistinfoparent">
             <div id="artistinfotext">
               <a
@@ -91256,6 +91322,9 @@ const UIController = (function () {
                   id="artistimg"
               /></a>
             </div>
+          </div>
+          <div id="albumcopyright">
+            ${album_copyrights}
           </div>
           <br /><br /><br /><br /><br />`
         detailDiv.insertAdjacentHTML("beforeend", html)
@@ -91364,6 +91433,14 @@ const APPController = (function (UICtrl, APICtrl) {
     } else {
       artistImg = artistData.images[1].url
     }
+    const albumID = track.album.id
+    const albumData = await APICtrl.getAlbum(token, albumID)
+    let albumCopyright = ""
+    for (var i = 0; i < albumData.copyrights.length; i++) {
+      albumCopyright += "<p>" + albumData.copyrights[i].text + "</p>"
+    }
+    console.log(albumCopyright)
+    console.log(albumData)
     console.log(artistData)
     UICtrl.createTrackInfo(
       track.album.images[1].url,
@@ -91375,7 +91452,11 @@ const APPController = (function (UICtrl, APICtrl) {
       track.popularity,
       expl,
       timeCon,
-      track.album.name,
+      albumData.name,
+      albumData.tracks.total,
+      albumData.popularity,
+      albumData.external_urls.spotify,
+      albumCopyright,
       tempoInt,
       artistData.name,
       artistData.followers.total,
