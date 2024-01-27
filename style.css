@@ -40,12 +40,39 @@ a {
 header > nav {
   margin: 0.5em 2em;
 }
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 #main {
   background-color: #333;
 }
 #logo {
   height: 2.5em;
   margin: 1em 2em 0.5em 2em;
+}
+#authorize {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+  border-radius: 10px;
+  padding: 0.5em;
+}
+#authorize img {
+  border-radius: 100%;
+  width: 2.5em;
+}
+#authorize p {
+  font-size: 1.2em;
+  margin: 0 0.5em;
+  color: #fff;
 }
 #maintext {
   display: flex;
@@ -256,7 +283,6 @@ div#albuminfotext {
   grid-template-rows: 20px 1fr;
   justify-content: center;
   align-items: center;
-  width: 80px;
   height: 50px;
   border: 3px outset #fff;
   padding: 0.5em 2em 0.5em 2em;

@@ -90929,15 +90929,44 @@ var request = require("request")
 const APIController = (function () {
   const sidoem = "849b448571b94989858d7a20cebc7306"
   const moedis = "bbba4ac160904b2c9fe63c035cd42b1b"
-  const _getToken = async () => {
-    const authOptions = {
+  const redirect_uri = "http://localhost:5500/"
+  function _requestAuthorization() {
+    let url = "https://accounts.spotify.com/authorize"
+    url += "?client_id=" + sidoem
+    url += "&response_type=code"
+    url += "&redirect_uri=" + encodeURI(redirect_uri)
+    url += "&show_dialog=true"
+    url +=
+      "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private"
+    window.location.href = url
+  }
+  function _getCode() {
+    let code = null
+    const queryString = window.location.search
+    if (queryString.length > 0) {
+      const urlParams = new URLSearchParams(queryString)
+      code = sessionStorage.setItem("kod", urlParams.get("code"))
+    }
+  }
+  function _prepareToken() {
+    let body = "grant_type=authorization_code"
+    body += "&code=" + sessionStorage.getItem("kod")
+    body += "&redirect_uri=" + encodeURI(redirect_uri)
+    body += "&client_id=" + sidoem
+    body += "&client_secret=" + moedis
+  }
+  function _getToken() {
+    var authOptions = {
       url: "https://accounts.spotify.com/api/token",
+      form: {
+        code: sessionStorage.getItem("kod"),
+        redirect_uri: redirect_uri,
+        grant_type: "authorization_code",
+      },
       headers: {
+        "content-type": "application/x-www-form-urlencoded",
         Authorization:
           "Basic " + new Buffer.from(sidoem + ":" + moedis).toString("base64"),
-      },
-      form: {
-        grant_type: "client_credentials",
       },
       json: true,
     }
@@ -90947,7 +90976,15 @@ const APIController = (function () {
       }
     })
   }
-
+  const _getUser = async (token) => {
+    const response = await fetch("https://api.spotify.com/v1/me", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    const data = await response.json()
+    return data
+  }
   const _getSearch = async (token, input) => {
     console.log(input)
     const response = await fetch(
@@ -91028,8 +91065,20 @@ const APIController = (function () {
     return data
   }
   return {
+    requestAuthorization() {
+      return _requestAuthorization()
+    },
+    getCode() {
+      return _getCode()
+    },
+    prepareToken() {
+      return _prepareToken()
+    },
     getToken() {
       return _getToken()
+    },
+    getUser(token) {
+      return _getUser(token)
     },
     getSearch(token, input) {
       return _getSearch(token, input)
@@ -91057,6 +91106,7 @@ const APIController = (function () {
 
 const UIController = (function () {
   const DOMElements = {
+    authorize: "#authorize",
     searchTracks: "#searchtracks",
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
@@ -91066,11 +91116,30 @@ const UIController = (function () {
   return {
     inputField() {
       return {
+        auth: document.querySelector(DOMElements.authorize),
         search: document.querySelector(DOMElements.searchTracks),
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
         mainText: document.querySelector(DOMElements.mainText),
         trackStuff: document.querySelector(DOMElements.trackStuff),
+      }
+    },
+    createUser(img, name) {
+      console.log(img)
+      console.log(name)
+      if (name == undefined) {
+        const html = `<img src="img/musician.webp" alt="Profilová fotka" />
+        <p>Přihlásit se</p>`
+        document
+          .querySelector(DOMElements.authorize)
+          .insertAdjacentHTML("beforeend", html)
+      } else {
+        document.querySelector(DOMElements.authorize).innerHTML = ""
+        const html = `<img src="${img}" alt="Profilová fotka" />
+        <p>${name}</p>`
+        document
+          .querySelector(DOMElements.authorize)
+          .insertAdjacentHTML("beforeend", html)
       }
     },
     createTrack(artist, name, img, id) {
@@ -91355,6 +91424,16 @@ const UIController = (function () {
 
 const APPController = (function (UICtrl, APICtrl) {
   const DOMInputs = UICtrl.inputField()
+  DOMInputs.auth.addEventListener("mouseover", async () => {
+    const user = await APIController.getUser(
+      sessionStorage.getItem("accessTok")
+    )
+    console.log(user)
+    UICtrl.createUser(user.images[0].url, user.display_name)
+  })
+  DOMInputs.auth.addEventListener("click", async () => {
+    APICtrl.requestAuthorization()
+  })
   DOMInputs.search.addEventListener("input", async (e) => {
     UICtrl.showTrackStuff()
     UICtrl.resetTrackList()
@@ -91470,8 +91549,12 @@ const APPController = (function (UICtrl, APICtrl) {
   return {
     init() {
       console.log("App is starting")
+      console.log("Obtaining code..")
+      APIController.getCode()
+      console.log(sessionStorage.getItem("kod"))
       APIController.getToken()
       console.log("Token obtained")
+      APIController.getUser(sessionStorage.getItem("accessTok"))
     },
   }
 })(UIController, APIController)
