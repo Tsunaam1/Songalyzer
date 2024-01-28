@@ -90948,14 +90948,7 @@ const APIController = (function () {
       code = sessionStorage.setItem("kod", urlParams.get("code"))
     }
   }
-  function _prepareToken() {
-    let body = "grant_type=authorization_code"
-    body += "&code=" + sessionStorage.getItem("kod")
-    body += "&redirect_uri=" + encodeURI(redirect_uri)
-    body += "&client_id=" + sidoem
-    body += "&client_secret=" + moedis
-  }
-  function _getToken() {
+  const _getToken = async () => {
     var authOptions = {
       url: "https://accounts.spotify.com/api/token",
       form: {
@@ -90972,9 +90965,11 @@ const APIController = (function () {
     }
     request.post(authOptions, function (error, response, body) {
       if (!error && response.statusCode === 200) {
-        var token = sessionStorage.setItem("accessTok", body.access_token)
+        sessionStorage.setItem("accessTok", body.access_token)
+        return body.access_token
       }
     })
+    return sessionStorage.getItem("accessTok")
   }
   const _getUser = async (token) => {
     const response = await fetch("https://api.spotify.com/v1/me", {
@@ -91071,9 +91066,6 @@ const APIController = (function () {
     getCode() {
       return _getCode()
     },
-    prepareToken() {
-      return _prepareToken()
-    },
     getToken() {
       return _getToken()
     },
@@ -91127,20 +91119,12 @@ const UIController = (function () {
     createUser(img, name) {
       console.log(img)
       console.log(name)
-      if (name == undefined) {
-        const html = `<img src="img/musician.webp" alt="Profilová fotka" />
-        <p>Přihlásit se</p>`
-        document
-          .querySelector(DOMElements.authorize)
-          .insertAdjacentHTML("beforeend", html)
-      } else {
-        document.querySelector(DOMElements.authorize).innerHTML = ""
-        const html = `<img src="${img}" alt="Profilová fotka" />
+      document.querySelector(DOMElements.authorize).innerHTML = ""
+      const html = `<img src="${img}" alt="Profilová fotka" />
         <p>${name}</p>`
-        document
-          .querySelector(DOMElements.authorize)
-          .insertAdjacentHTML("beforeend", html)
-      }
+      document
+        .querySelector(DOMElements.authorize)
+        .insertAdjacentHTML("beforeend", html)
     },
     createTrack(artist, name, img, id) {
       const html = `<div class="track" id=${id}>
@@ -91414,23 +91398,11 @@ const UIController = (function () {
     storeToken(value) {
       document.querySelector(DOMElements.hfToken).value = value
     },
-    getStoredToken() {
-      return {
-        token: document.querySelector(DOMElements.hfToken).value,
-      }
-    },
   }
 })()
 
 const APPController = (function (UICtrl, APICtrl) {
   const DOMInputs = UICtrl.inputField()
-  DOMInputs.auth.addEventListener("mouseover", async () => {
-    const user = await APIController.getUser(
-      sessionStorage.getItem("accessTok")
-    )
-    console.log(user)
-    UICtrl.createUser(user.images[0].url, user.display_name)
-  })
   DOMInputs.auth.addEventListener("click", async () => {
     APICtrl.requestAuthorization()
   })
@@ -91552,9 +91524,21 @@ const APPController = (function (UICtrl, APICtrl) {
       console.log("Obtaining code..")
       APIController.getCode()
       console.log(sessionStorage.getItem("kod"))
-      APIController.getToken()
-      console.log("Token obtained")
-      APIController.getUser(sessionStorage.getItem("accessTok"))
+      async function toko() {
+        await APIController.getToken()
+      }
+      async function usus() {
+        const user = await APIController.getUser(
+          sessionStorage.getItem("accessTok")
+        )
+        console.log(user)
+        UICtrl.createUser(user.images[0].url, user.display_name, user)
+      }
+      console.log("Obtaining token..")
+      toko().then(
+        () => console.log("Obtaining user info.."),
+        setTimeout(() => usus(), 500)
+      )
     },
   }
 })(UIController, APIController)
