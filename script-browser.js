@@ -91059,6 +91059,24 @@ const APIController = (function () {
     const data = await result.json()
     return data
   }
+  const _createPlaylist = async (token, userID) => {
+    const result = await fetch(
+      `https://api.spotify.com/v1/users/${userID}/playlists`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-type": "application/json",
+        },
+        data: {
+          name: "Skladby ze Songalyzeru",
+          description: "Playlist vytvoření z uložených písniček ze Songalyzeru",
+          public: true,
+        },
+      }
+    )
+    const data = await result.json()
+    return data
+  }
   return {
     requestAuthorization() {
       return _requestAuthorization()
@@ -91092,6 +91110,9 @@ const APIController = (function () {
     },
     getArtist(token, artistID) {
       return _getArtist(token, artistID)
+    },
+    createPlaylist(token, userID) {
+      return _createPlaylist(token, userID)
     },
   }
 })()
