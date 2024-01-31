@@ -196,12 +196,26 @@ div#trackinfo {
   -moz-box-shadow: -1px 0px 63px -32px rgba(0, 0, 0, 0.65);
   box-shadow: -1px 0px 63px -32px rgba(0, 0, 0, 0.65);
 }
-#basicinfo > img {
+#imgandplus > img {
   width: 15em;
   border: 15px outset #000000;
   -webkit-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   -moz-box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
   box-shadow: -1px 0px 63px -23px rgba(0, 0, 0, 0.65);
+}
+.plus {
+  cursor: pointer;
+  fill: #777;
+  position: absolute;
+  right: 2em;
+  top: 2em;
+  transition: all 0.1s ease-out;
+}
+.plus > svg {
+  height: 2.5em;
+}
+.plus:hover {
+  fill: #eee;
 }
 #basicinfo a {
   color: #777;

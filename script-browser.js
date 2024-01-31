@@ -91088,6 +91088,26 @@ const APIController = (function () {
     const data = await result.json()
     return data
   }
+  const _addItemsToPlaylist = async (token, trackURI) => {
+    const playlistID = sessionStorage.getItem("plID")
+    console.log(trackURI)
+    var authOptions = {
+      url: `https://api.spotify.com/v1/playlists/${playlistID}/tracks`,
+      form: JSON.stringify({
+        uris: [trackURI],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      json: true,
+    }
+    request.post(authOptions, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        console.log(body)
+      }
+    })
+  }
   return {
     requestAuthorization() {
       return _requestAuthorization()
@@ -91128,6 +91148,9 @@ const APIController = (function () {
     getPlaylists(token) {
       return _getPlaylists(token)
     },
+    addItemsToPlaylist(token, trackURI) {
+      return _addItemsToPlaylist(token, trackURI)
+    },
   }
 })()
 
@@ -91136,6 +91159,7 @@ const UIController = (function () {
     authorize: "#authorize",
     createPlaylist: "#createplaylist",
     clickablePlaylist: "#playlistclickable",
+    plusBut: "#imgandplus",
     searchTracks: "#searchtracks",
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
@@ -91148,6 +91172,7 @@ const UIController = (function () {
         auth: document.querySelector(DOMElements.authorize),
         playlist: document.querySelector(DOMElements.createPlaylist),
         clickPlaylist: document.querySelector(DOMElements.clickablePlaylist),
+        plusBut: document.querySelector(DOMElements.plusBut),
         search: document.querySelector(DOMElements.searchTracks),
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
@@ -91217,7 +91242,8 @@ const UIController = (function () {
       artist_popularity,
       artist_genres,
       artist_url,
-      artist_img
+      artist_img,
+      trackURI
     ) {
       const detailDiv = document.querySelector(DOMElements.divTrackInfo)
       detailDiv.innerHTML = ""
@@ -91225,13 +91251,40 @@ const UIController = (function () {
       const prevmp3 = mp3
       if (prevmp3 == null) {
         const html = `<div id="basicinfo">
-        <img
-          src="${img}"
-          alt="TrackInfo Img"
-        />
+        <div id="imgandplus">
+          <img
+            src="${img}"
+            alt="TrackInfo Img"
+          />
+          <div id="${trackURI}" class="plus">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            id="${trackURI}"
+          >
+            <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+            <path
+              id="${trackURI}"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"
+            />
+          </svg>
+        </div>
+        </div>
         <h1>${title}</h1>
-        <h3><a href="${album_url}" target="_blank">${album_name}</a></h3>
-        <h2><a href="${artist_url}" target="_blank">${artist_name}</a></h2>
+        <h3>
+          <a
+            href="${album_url}"
+            target="_blank"
+            >${album_name}</a
+          >
+        </h3>
+        <h2>
+          <a
+            href="${artist_url}"
+            target="_blank"
+            >${artist_name}</a
+          >
+        </h2>
         <!--?xml version="1.0" encoding="UTF-8" standalone="no"?-->
         <a
           href="${url}"
@@ -91273,67 +91326,94 @@ const UIController = (function () {
         </div>
       </div>
       <div id="albuminfoparent">
-            <div id="albuminfotext">
-              <a
-                href="${album_url}"
-                target="_blank"
-                class="albuminfoheader"
-                ><p>${album_name}</p></a
-              >
-              <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
-              <p class="albuminfotext">Popularita: ${album_popularity}%</p>
-            </div>
-            <div id="albuminfo">
-              <a
-                href="${album_url}"
-                target="_blank"
-                ><img
-                  src="${img}"
-                  id="albumimg"
-                  alt=""
-              /></a>
-            </div>
-          </div>
+        <div id="albuminfotext">
+          <a
+            href="${album_url}"
+            target="_blank"
+            class="albuminfoheader"
+            ><p>${album_name}</p></a
+          >
+          <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
+          <p class="albuminfotext">Popularita: ${album_popularity}%</p>
+        </div>
+        <div id="albuminfo">
+          <a
+            href="${album_url}"
+            target="_blank"
+            ><img
+              src="${img}"
+              id="albumimg"
+              alt=""
+          /></a>
+        </div>
+      </div>
       <div id="artistinfoparent">
-            <div id="artistinfotext">
-              <a
-                href="${artist_url}"
-                target="_blank"
-                class="artistinfoheader"
-                ><p>${artist_name}</p></a
-              >
-              <p class="artistinfotext" id="followers">
-                Počet sledujících: ${artist_followers}
-              </p>
-              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
-              <p class="artistinfotext">
-                Žánry: ${artist_genres}
-              </p>
-            </div>
-            <div id="artistinfo">
-              <a
-                href="${artist_url}"
-                target="_blank"
-                ><img
-                  src="${artist_img}"
-                  alt="Artist Image"
-                  id="artistimg"
-              /></a>
-            </div>
-          </div>
-          <div id="albumcopyright">
-            ${album_copyrights}
-          </div>`
+        <div id="artistinfotext">
+          <a
+            href="${artist_url}"
+            target="_blank"
+            class="artistinfoheader"
+            ><p>${artist_name}</p></a
+          >
+          <p class="artistinfotext" id="followers">
+            Počet sledujících: ${artist_followers}
+          </p>
+          <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
+          <p class="artistinfotext">
+            Žánry: ${artist_genres}
+          </p>
+        </div>
+        <div id="artistinfo">
+          <a
+            href="${artist_url}"
+            target="_blank"
+            ><img
+              src="${artist_img}"
+              alt="Artist Image"
+              id="artistimg"
+          /></a>
+        </div>
+      </div>
+      <div id="albumcopyright">
+        ${album_copyrights}
+      </div>`
         detailDiv.insertAdjacentHTML("beforeend", html)
       } else {
         const html = `<div id="basicinfo">
-        <img
-          src="${img}"
-          alt="TrackInfo Img"
-        />
+        <div id="imgandplus">
+          <img
+            src="${img}"
+            alt="TrackInfo Img"
+          />
+          <div id="${trackURI}" class="plus">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              id="${trackURI}"
+            >
+              <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                id="${trackURI}"
+                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"
+              />
+            </svg>
+          </div>
+        </div>
         <h1>${title}</h1>
-        <h3><a href="${album_url}" target="_blank">${album_name}</a></h3>
-        <h2><a href="${artist_url}" target="_blank">${artist_name}</a></h2>
+        <h3>
+          <a
+            href="${album_url}"
+            target="_blank"
+            >${album_name}</a
+          >
+        </h3>
+        <h2>
+          <a
+            href="${artist_url}"
+            target="_blank"
+            >${artist_name}</a
+          >
+        </h2>
         <audio controls="">
           <source
             src="${mp3}"
@@ -91382,57 +91462,57 @@ const UIController = (function () {
         </div>
       </div>
       <div id="albuminfoparent">
-            <div id="albuminfotext">
-              <a
-                href="${album_url}"
-                target="_blank"
-                class="albuminfoheader"
-                ><p>${album_name}</p></a
-              >
-              <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
-              <p class="albuminfotext">Popularita: ${album_popularity}%</p>
-            </div>
-            <div id="albuminfo">
-              <a
-                href="${album_url}"
-                target="_blank"
-                ><img
-                  src="${img}"
-                  id="albumimg"
-                  alt=""
-              /></a>
-            </div>
-          </div>
+        <div id="albuminfotext">
+          <a
+            href="${album_url}"
+            target="_blank"
+            class="albuminfoheader"
+            ><p>${album_name}</p></a
+          >
+          <p class="albuminfotext">Počet skladeb: ${album_tracks}</p>
+          <p class="albuminfotext">Popularita: ${album_popularity}%</p>
+        </div>
+        <div id="albuminfo">
+          <a
+            href="${album_url}"
+            target="_blank"
+            ><img
+              src="${img}"
+              id="albumimg"
+              alt=""
+          /></a>
+        </div>
+      </div>
       <div id="artistinfoparent">
-            <div id="artistinfotext">
-              <a
-                href="${artist_url}"
-                target="_blank"
-                class="artistinfoheader"
-                ><p>${artist_name}</p></a
-              >
-              <p class="artistinfotext" id="followers">
-                Počet sledujících: ${artist_followers}
-              </p>
-              <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
-              <p class="artistinfotext">
-                Žánry: ${artist_genres}
-              </p>
-            </div>
-            <div id="artistinfo">
-              <a
-                href="${artist_url}"
-                target="_blank"
-                ><img
-                  src="${artist_img}"
-                  alt="Artist Image"
-                  id="artistimg"
-              /></a>
-            </div>
-          </div>
-          <div id="albumcopyright">
-            ${album_copyrights}
-          </div>`
+        <div id="artistinfotext">
+          <a
+            href="${artist_url}"
+            target="_blank"
+            class="artistinfoheader"
+            ><p>${artist_name}</p></a
+          >
+          <p class="artistinfotext" id="followers">
+            Počet sledujících: ${artist_followers}
+          </p>
+          <p class="artistinfotext" id="popularity">Popularita: ${artist_popularity}%</p>
+          <p class="artistinfotext">
+            Žánry: ${artist_genres}
+          </p>
+        </div>
+        <div id="artistinfo">
+          <a
+            href="${artist_url}"
+            target="_blank"
+            ><img
+              src="${artist_img}"
+              alt="Artist Image"
+              id="artistimg"
+          /></a>
+        </div>
+      </div>
+      <div id="albumcopyright">
+        ${album_copyrights}
+      </div>`
         detailDiv.insertAdjacentHTML("beforeend", html)
       }
     },
@@ -91465,6 +91545,12 @@ const APPController = (function (UICtrl, APICtrl) {
     console.log(user.id)
     APICtrl.createPlaylist(token, user.id)
     UICtrl.checkPlaylist()
+  })
+  DOMInputs.trackInfo.addEventListener("click", async (e) => {
+    const token = sessionStorage.getItem("accessTok")
+    const trackURI = e.target.id
+    console.log(trackURI)
+    APICtrl.addItemsToPlaylist(token, trackURI)
   })
   DOMInputs.search.addEventListener("input", async (e) => {
     UICtrl.checkPlaylist()
@@ -91508,9 +91594,8 @@ const APPController = (function (UICtrl, APICtrl) {
       }
     }
     const track = await APICtrl.getTrack(token, trackID)
+    console.log(track)
     const trackFeat = await APICtrl.getTrackFeatures(token, trackID)
-    const lyrics = await APICtrl.getLyrics(token, trackID)
-    console.log(lyrics)
     const tempo = trackFeat.tempo
     const tempoInt = ~~(tempo + 0.5)
     const time = track.duration_ms - 1000
@@ -91551,9 +91636,11 @@ const APPController = (function (UICtrl, APICtrl) {
     for (var i = 0; i < albumData.copyrights.length; i++) {
       albumCopyright += "<p>" + albumData.copyrights[i].text + "</p>"
     }
+    const trackURI = track.uri
     console.log(albumCopyright)
     console.log(albumData)
     console.log(artistData)
+    console.log(trackURI)
     UICtrl.createTrackInfo(
       track.album.images[1].url,
       track.name,
@@ -91575,7 +91662,8 @@ const APPController = (function (UICtrl, APICtrl) {
       artistData.popularity,
       genres,
       artistData.external_urls.spotify,
-      artistImg
+      artistImg,
+      trackURI
     )
   })
 
@@ -91599,11 +91687,13 @@ const APPController = (function (UICtrl, APICtrl) {
         const pll = await APIController.getPlaylists(
           sessionStorage.getItem("accessTok")
         )
-        console.log(pll.items[0].name)
+        console.log(pll)
         for (var i = 0; i < pll.items.length; i++) {
           if (pll.items[i].name == "Skladby ze Songalyzeru") {
             document.getElementById("createplaylist").style.display = "flex"
             UICtrl.checkPlaylist()
+            sessionStorage.setItem("plID", pll.items[i].id)
+            console.log(sessionStorage.getItem("plID"))
           } else {
             document.getElementById("createplaylist").style.display = "flex"
           }
