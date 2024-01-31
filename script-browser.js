@@ -90937,7 +90937,7 @@ const APIController = (function () {
     url += "&redirect_uri=" + encodeURI(redirect_uri)
     url += "&show_dialog=true"
     url +=
-      "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private"
+      "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private playlist-modify-public"
     window.location.href = url
   }
   function _getCode() {
@@ -91060,20 +91060,31 @@ const APIController = (function () {
     return data
   }
   const _createPlaylist = async (token, userID) => {
-    const result = await fetch(
-      `https://api.spotify.com/v1/users/${userID}/playlists`,
-      {
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-type": "application/json",
-        },
-        data: {
-          name: "Skladby ze Songalyzeru",
-          description: "Playlist vytvoření z uložených písniček ze Songalyzeru",
-          public: true,
-        },
+    var authOptions = {
+      url: `https://api.spotify.com/v1/users/${userID}/playlists`,
+      form: JSON.stringify({
+        name: "Skladby ze Songalyzeru",
+        description: "Playlist vytvořený z uložených písniček ze Songalyzeru",
+        public: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      json: true,
+    }
+    request.post(authOptions, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        console.log(body)
       }
-    )
+    })
+  }
+  const _getPlaylists = async (token) => {
+    const result = await fetch(`https://api.spotify.com/v1/me/playlists`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
     const data = await result.json()
     return data
   }
@@ -91114,12 +91125,17 @@ const APIController = (function () {
     createPlaylist(token, userID) {
       return _createPlaylist(token, userID)
     },
+    getPlaylists(token) {
+      return _getPlaylists(token)
+    },
   }
 })()
 
 const UIController = (function () {
   const DOMElements = {
     authorize: "#authorize",
+    createPlaylist: "#createplaylist",
+    clickablePlaylist: "#playlistclickable",
     searchTracks: "#searchtracks",
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
@@ -91130,6 +91146,8 @@ const UIController = (function () {
     inputField() {
       return {
         auth: document.querySelector(DOMElements.authorize),
+        playlist: document.querySelector(DOMElements.createPlaylist),
+        clickPlaylist: document.querySelector(DOMElements.clickablePlaylist),
         search: document.querySelector(DOMElements.searchTracks),
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
@@ -91145,6 +91163,22 @@ const UIController = (function () {
         <p>${name}</p>`
       document
         .querySelector(DOMElements.authorize)
+        .insertAdjacentHTML("beforeend", html)
+    },
+    checkPlaylist() {
+      document.querySelector(DOMElements.createPlaylist).innerHTML = ""
+      const html = `<div id="playlistnonclickable">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+        <path
+          fill="#777"
+          d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+        />
+      </svg>
+      <p>Playlist nalezen</p>
+    </div>`
+      document
+        .querySelector(DOMElements.createPlaylist)
         .insertAdjacentHTML("beforeend", html)
     },
     createTrack(artist, name, img, id) {
@@ -91289,8 +91323,7 @@ const UIController = (function () {
           </div>
           <div id="albumcopyright">
             ${album_copyrights}
-          </div>
-          <br /><br /><br /><br /><br />`
+          </div>`
         detailDiv.insertAdjacentHTML("beforeend", html)
       } else {
         const html = `<div id="basicinfo">
@@ -91399,8 +91432,7 @@ const UIController = (function () {
           </div>
           <div id="albumcopyright">
             ${album_copyrights}
-          </div>
-          <br /><br /><br /><br /><br />`
+          </div>`
         detailDiv.insertAdjacentHTML("beforeend", html)
       }
     },
@@ -91427,7 +91459,15 @@ const APPController = (function (UICtrl, APICtrl) {
   DOMInputs.auth.addEventListener("click", async () => {
     APICtrl.requestAuthorization()
   })
+  DOMInputs.clickPlaylist.addEventListener("click", async () => {
+    const token = sessionStorage.getItem("accessTok")
+    const user = await APICtrl.getUser(sessionStorage.getItem("accessTok"))
+    console.log(user.id)
+    APICtrl.createPlaylist(token, user.id)
+    UICtrl.checkPlaylist()
+  })
   DOMInputs.search.addEventListener("input", async (e) => {
+    UICtrl.checkPlaylist()
     UICtrl.showTrackStuff()
     UICtrl.resetTrackList()
     UICtrl.deleteMainText()
@@ -91555,10 +91595,25 @@ const APPController = (function (UICtrl, APICtrl) {
         console.log(user)
         UICtrl.createUser(user.images[0].url, user.display_name, user)
       }
+      async function plal() {
+        const pll = await APIController.getPlaylists(
+          sessionStorage.getItem("accessTok")
+        )
+        console.log(pll.items[0].name)
+        for (var i = 0; i < pll.items.length; i++) {
+          if (pll.items[i].name == "Skladby ze Songalyzeru") {
+            document.getElementById("createplaylist").style.display = "flex"
+            UICtrl.checkPlaylist()
+          } else {
+            document.getElementById("createplaylist").style.display = "flex"
+          }
+        }
+      }
       console.log("Obtaining token..")
       toko().then(
         () => console.log("Obtaining user info.."),
-        setTimeout(() => usus(), 500)
+        setTimeout(() => usus(), 500),
+        setTimeout(() => plal(), 500)
       )
     },
   }

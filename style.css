@@ -38,6 +38,7 @@ a {
   color: #fff;
 }
 header > nav {
+  display: flex;
   margin: 0.5em 2em;
 }
 ::-webkit-scrollbar {
@@ -48,6 +49,9 @@ header > nav {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0);
 }
 #main {
   background-color: #333;
@@ -64,15 +68,62 @@ header > nav {
   background-color: #333;
   border-radius: 10px;
   padding: 0.5em;
+  transition: all 0.3s ease-out;
+}
+#authorize:hover {
+  background-color: #555;
+}
+#createplaylist {
+  display: none;
+}
+#createplaylist > div#playlistclickable {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+  border-radius: 10px;
+  padding: 0.5em;
+  margin-right: 1em;
+  transition: all 0.3s ease-out;
+}
+#createplaylist > div#playlistclickable:hover {
+  background-color: #555;
+}
+#createplaylist > div#playlistnonclickable:hover {
+  background-color: #333;
+}
+#createplaylist > div#playlistclickable:hover > svg {
+  fill: #ddd;
 }
 #authorize img {
   border-radius: 100%;
   width: 2.5em;
 }
+#createplaylist svg {
+  width: 2.5em;
+  fill: #888;
+  transition: all 0.3s ease-out;
+}
 #authorize p {
   font-size: 1.2em;
   margin: 0 0.5em;
   color: #fff;
+}
+#createplaylist p {
+  font-size: 1.2em;
+  margin: 0 0.5em;
+  color: #fff;
+}
+#playlistnonclickable {
+  cursor: default;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+  border-radius: 10px;
+  padding: 0.5em;
+  margin-right: 1em;
 }
 #maintext {
   display: flex;
@@ -276,6 +327,7 @@ div#albuminfotext {
   color: #aaa;
   text-align: start;
   margin: 1em;
+  margin-bottom: 5em;
 }
 .box {
   display: grid;
