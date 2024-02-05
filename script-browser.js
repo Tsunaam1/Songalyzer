@@ -90983,7 +90983,7 @@ const APIController = (function () {
   const _getSearch = async (token, input) => {
     console.log(input)
     const response = await fetch(
-      `https://api.spotify.com/v1/search?q=${input}&type=artist%2Ctrack%2Calbum`,
+      `https://api.spotify.com/v1/search?q=${input}&type=artist%2Ctrack%2Calbum&market=CZ`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -91108,6 +91108,38 @@ const APIController = (function () {
       }
     })
   }
+  const _deleteItemsFromPlaylist = async (token, trackURI) => {
+    const playlistID = sessionStorage.getItem("plID")
+    var authOptions = {
+      url: `https://api.spotify.com/v1/playlists/${playlistID}/tracks`,
+      form: JSON.stringify({
+        tracks: [trackURI],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      json: true,
+    }
+    request.delete(authOptions, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        console.log(body)
+      }
+    })
+  }
+  const _getPlaylistItems = async (token) => {
+    const playlistID = sessionStorage.getItem("plID")
+    const result = await fetch(
+      `https://api.spotify.com/v1/playlists/${playlistID}/tracks?market=CZ&fields=items%28track%28id%29%29`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+    const data = await result.json()
+    return data
+  }
   return {
     requestAuthorization() {
       return _requestAuthorization()
@@ -91151,6 +91183,12 @@ const APIController = (function () {
     addItemsToPlaylist(token, trackURI) {
       return _addItemsToPlaylist(token, trackURI)
     },
+    deleteItemFromPlaylist(token, trackURI) {
+      return _deleteItemsFromPlaylist(token, trackURI)
+    },
+    getPlaylistItems(token) {
+      return _getPlaylistItems(token)
+    },
   }
 })()
 
@@ -91160,6 +91198,7 @@ const UIController = (function () {
     createPlaylist: "#createplaylist",
     clickablePlaylist: "#playlistclickable",
     plusBut: "#imgandplus",
+    pluss: ".plus",
     searchTracks: "#searchtracks",
     divSongList: "#tracklist",
     divTrackInfo: "#trackinfo",
@@ -91173,6 +91212,7 @@ const UIController = (function () {
         playlist: document.querySelector(DOMElements.createPlaylist),
         clickPlaylist: document.querySelector(DOMElements.clickablePlaylist),
         plusBut: document.querySelector(DOMElements.plusBut),
+        pluss: document.querySelector(DOMElements.pluss),
         search: document.querySelector(DOMElements.searchTracks),
         tracks: document.querySelector(DOMElements.divSongList),
         trackInfo: document.querySelector(DOMElements.divTrackInfo),
@@ -91221,6 +91261,24 @@ const UIController = (function () {
         .querySelector(DOMElements.divSongList)
         .insertAdjacentHTML("beforeend", html)
     },
+    PlaylistInItem(trackURI) {
+      document.querySelector(DOMElements.pluss).innerHTML = ""
+      const html = `<svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      id="${trackURI}"
+      class="liked"
+    >
+      <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+      <path
+        id="${trackURI}"
+        d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"
+      />
+    </svg>`
+      document
+        .querySelector(DOMElements.pluss)
+        .insertAdjacentHTML("beforeend", html)
+    },
     createTrackInfo(
       img,
       title,
@@ -91257,18 +91315,18 @@ const UIController = (function () {
             alt="TrackInfo Img"
           />
           <div id="${trackURI}" class="plus">
-          <svg
+            <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             id="${trackURI}"
-          >
-            <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-            <path
-              id="${trackURI}"
-              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"
-            />
-          </svg>
-        </div>
+            >
+              <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                id="${trackURI}"
+                d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"
+              />
+            </svg>
+          </div>
         </div>
         <h1>${title}</h1>
         <h3>
@@ -91387,14 +91445,14 @@ const UIController = (function () {
           />
           <div id="${trackURI}" class="plus">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-              id="${trackURI}"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            id="${trackURI}"
             >
               <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
               <path
                 id="${trackURI}"
-                d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"
+                d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"
               />
             </svg>
           </div>
@@ -91550,7 +91608,31 @@ const APPController = (function (UICtrl, APICtrl) {
     const token = sessionStorage.getItem("accessTok")
     const trackURI = e.target.id
     console.log(trackURI)
+    sessionStorage.setItem("trackURI", trackURI)
+    function delItfromPl() {
+      const liked = document.getElementsByClassName("liked")
+      console.log(liked)
+      if (liked != null) {
+        console.log("yup, it works fam")
+      } else {
+        console.log("nope, doesn't work fam")
+      }
+    }
+    delItfromPl()
     APICtrl.addItemsToPlaylist(token, trackURI)
+    async function checkPl() {
+      const chkPl = await APICtrl.getPlaylistItems(token)
+      console.log(chkPl)
+      console.log(sessionStorage.getItem("trackID"))
+      console.log(trackURI)
+      for (var i = 0; i < chkPl.items.length; i++) {
+        if (chkPl.items[i].track.id == sessionStorage.getItem("trackID")) {
+          UICtrl.PlaylistInItem(trackURI)
+        }
+      }
+    }
+
+    setTimeout(() => checkPl(), 500)
   })
   DOMInputs.search.addEventListener("input", async (e) => {
     UICtrl.checkPlaylist()
@@ -91582,6 +91664,7 @@ const APPController = (function (UICtrl, APICtrl) {
     console.log(e)
     const trackID = e.target.id
     console.log(trackID)
+    sessionStorage.setItem("trackID", trackID)
     function convertMsToTime(ms) {
       const totalSeconds = Math.round(ms / 1000)
       const hours = Math.floor(totalSeconds / 3600)
@@ -91665,6 +91748,19 @@ const APPController = (function (UICtrl, APICtrl) {
       artistImg,
       trackURI
     )
+    async function checkPl() {
+      const chkPl = await APICtrl.getPlaylistItems(token)
+      console.log(chkPl)
+      console.log(trackID)
+      console.log(trackURI)
+      for (var i = 0; i < chkPl.items.length; i++) {
+        if (chkPl.items[i].track.id == trackID) {
+          UICtrl.PlaylistInItem(trackURI)
+        } else {
+        }
+      }
+    }
+    setTimeout(() => checkPl(), 500)
   })
 
   return {

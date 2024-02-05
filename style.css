@@ -214,6 +214,13 @@ div#trackinfo {
 .plus > svg {
   height: 2.5em;
 }
+.liked {
+  fill: #fff;
+  transition: all 0.1s ease-out;
+}
+.liked:hover {
+  fill: #aaa;
+}
 .plus:hover {
   fill: #eee;
 }
