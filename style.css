@@ -90,8 +90,8 @@ header > nav {
 #createplaylist > div#playlistclickable:hover {
   background-color: #555;
 }
-#createplaylist > div#playlistnonclickable:hover {
-  background-color: #333;
+#createplaylist > div#playlistexist:hover {
+  background-color: #555;
 }
 #createplaylist > div#playlistclickable:hover > svg {
   fill: #ddd;
@@ -115,8 +115,8 @@ header > nav {
   margin: 0 0.5em;
   color: #fff;
 }
-#playlistnonclickable {
-  cursor: default;
+#playlistexist {
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -124,6 +124,7 @@ header > nav {
   border-radius: 10px;
   padding: 0.5em;
   margin-right: 1em;
+  transition: all 0.3s ease-out;
 }
 #maintext {
   display: flex;
@@ -146,6 +147,79 @@ header > nav {
   font-size: 1.6em;
   padding: 6px;
   border: #555 solid 3px;
+}
+#playlisttab {
+  display: grid;
+  grid-template-rows: 5em 1fr;
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden;
+  border-radius: 15px 0 0 15px;
+  margin-top: 7em;
+  right: -100vh;
+  top: 0;
+  height: 80vh;
+  width: 50vh;
+  background-color: #444;
+  z-index: 999;
+  transition: all 0.45s ease-in-out;
+  -webkit-box-shadow: -19px 0px 39px -1px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -19px 0px 39px -1px rgba(0, 0, 0, 0.75);
+  box-shadow: -19px 0px 39px -1px rgba(0, 0, 0, 0.75);
+}
+#pltabtext {
+  color: #fff;
+  font-weight: 600;
+  margin: 1em;
+}
+#playlisttrack {
+  display: grid;
+  grid-template-columns: 40vh 1fr;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-left: 0.5em;
+  padding: 0.5em;
+  background-color: #333;
+  border-radius: 10px 0 0 10px;
+  transition: all 0.2s ease-out;
+}
+#playlisttrack:hover {
+  background-color: #555;
+  transform: scale(1.01);
+}
+#playlisttracks {
+  margin-bottom: 0.5em;
+}
+#playlisttrackinfo {
+  display: grid;
+  grid-template-columns: 3.6em 1fr;
+  align-items: center;
+}
+#playlisttrackinfo > img {
+  border-radius: 10px;
+  height: 3em;
+}
+#playlisttracktitle {
+  color: #fff;
+}
+#playlisttrackt {
+  font-size: 0.6em;
+}
+#playlisttracklike {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#playlisttracklike > svg {
+  height: 1.8em;
+  fill: #aaa;
+}
+#playlisttrack:hover > #playlisttracklike {
+  display: flex;
+  transition: all 0.2s ease-in-out;
+}
+#playlisttracklike > svg:hover {
+  fill: #fff;
 }
 #trackstuff {
   display: flex;

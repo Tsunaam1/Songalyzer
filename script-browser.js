@@ -90937,7 +90937,7 @@ const APIController = (function () {
     url += "&redirect_uri=" + encodeURI(redirect_uri)
     url += "&show_dialog=true"
     url +=
-      "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private playlist-modify-public"
+      "&scope=user-read-private user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private playlist-modify-public"
     window.location.href = url
   }
   function _getCode() {
@@ -90983,7 +90983,9 @@ const APIController = (function () {
   const _getSearch = async (token, input) => {
     console.log(input)
     const response = await fetch(
-      `https://api.spotify.com/v1/search?q=${input}&type=artist%2Ctrack%2Calbum&market=CZ`,
+      `https://api.spotify.com/v1/search?q=${input}&type=artist%2Ctrack%2Calbum&market=${sessionStorage.getItem(
+        "userCountry"
+      )}`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -91064,7 +91066,8 @@ const APIController = (function () {
       url: `https://api.spotify.com/v1/users/${userID}/playlists`,
       form: JSON.stringify({
         name: "Skladby ze Songalyzeru",
-        description: "Playlist vytvořený z uložených písniček ze Songalyzeru",
+        description:
+          "Playlist vytvořený z uložených písniček ze Songalyzeru. https://github.com/Tsunaam1/Songalyzer",
         public: true,
       }),
       headers: {
@@ -91130,7 +91133,9 @@ const APIController = (function () {
   const _getPlaylistItems = async (token) => {
     const playlistID = sessionStorage.getItem("plID")
     const result = await fetch(
-      `https://api.spotify.com/v1/playlists/${playlistID}/tracks?market=CZ&fields=items%28track%28id%29%29`,
+      `https://api.spotify.com/v1/playlists/${playlistID}/tracks?market=${sessionStorage.getItem(
+        "userCountry"
+      )}&fields=items%28track%2C+name%2C+artists%28name%29%2C+external_urls%2C+album%28images%29%2C+uri%29`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -91197,6 +91202,9 @@ const UIController = (function () {
     authorize: "#authorize",
     createPlaylist: "#createplaylist",
     clickablePlaylist: "#playlistclickable",
+    playlistExist: "#playlistexist",
+    playlistTab: "#playlisttab",
+    playlistTracks: "#playlisttracks",
     plusBut: "#imgandplus",
     pluss: ".plus",
     searchTracks: "#searchtracks",
@@ -91211,6 +91219,9 @@ const UIController = (function () {
         auth: document.querySelector(DOMElements.authorize),
         playlist: document.querySelector(DOMElements.createPlaylist),
         clickPlaylist: document.querySelector(DOMElements.clickablePlaylist),
+        playlistExist: document.querySelector(DOMElements.playlistExist),
+        playlistTab: document.querySelector(DOMElements.playlistTab),
+        playlistTracks: document.querySelector(DOMElements.playlistTracks),
         plusBut: document.querySelector(DOMElements.plusBut),
         pluss: document.querySelector(DOMElements.pluss),
         search: document.querySelector(DOMElements.searchTracks),
@@ -91232,7 +91243,7 @@ const UIController = (function () {
     },
     checkPlaylist() {
       document.querySelector(DOMElements.createPlaylist).innerHTML = ""
-      const html = `<div id="playlistnonclickable">
+      const html = `<div id="playlistexist">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
         <path
@@ -91240,7 +91251,7 @@ const UIController = (function () {
           d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
         />
       </svg>
-      <p>Playlist nalezen</p>
+      <p>Otevřít playlist</p>
     </div>`
       document
         .querySelector(DOMElements.createPlaylist)
@@ -91294,6 +91305,38 @@ const UIController = (function () {
     </svg>`
       document
         .querySelector(DOMElements.pluss)
+        .insertAdjacentHTML("beforeend", html)
+    },
+    loadItemsFromPlaylist(img, title, artist, url, trackURI) {
+      const html = `<div id="playlisttrack">
+      <a href="${url}" target="_blank">
+        <div id="playlisttrackinfo">
+          <img src="${img}" alt="Track Image" />
+          <div id="playlisttracktitle">
+            <div id="playlisttrackt">
+              <h1>${title}</h1>
+            </div>
+            <div id="playlisttracka">${artist}</div>
+          </div>
+        </div>
+      </a>
+      <div id="playlisttracklike">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+          id="${trackURI}"
+          class="liked"
+        >
+          <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+          <path
+            id="${trackURI}"
+            d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"
+          />
+        </svg>
+      </div>
+    </div>`
+      document
+        .querySelector(DOMElements.playlistTracks)
         .insertAdjacentHTML("beforeend", html)
     },
     createTrackInfo(
@@ -91621,6 +91664,89 @@ const APPController = (function (UICtrl, APICtrl) {
     APICtrl.createPlaylist(token, user.id)
     UICtrl.checkPlaylist()
   })
+  DOMInputs.playlist.addEventListener("click", async (e) => {
+    async function resetPlTab() {
+      document.querySelector("#playlisttracks").innerHTML = ""
+      ple = document.getElementById("playlisttab")
+      if (ple.style.right == "-100vh") {
+        ple.style.right = 0
+      } else {
+        ple.style.right = "-100vh"
+      }
+      const token = sessionStorage.getItem("accessTok")
+      const trackURI = e.target.id
+      const playlistItems = await APICtrl.getPlaylistItems(token)
+      console.log(playlistItems.items)
+      sessionStorage.setItem("trackURI", trackURI)
+      const arrPlaylistTracks = Array.from(playlistItems.items)
+      arrPlaylistTracks.forEach((el) => {
+        let artists = ""
+        for (var i = 0; i < el.track.artists.length; i++) {
+          if (i == 0) {
+            artists = artists + el.track.artists[i].name
+          } else {
+            artists = artists + ", " + el.track.artists[i].name
+          }
+        }
+        UICtrl.loadItemsFromPlaylist(
+          el.track.album.images[2].url,
+          el.track.name,
+          artists,
+          el.track.external_urls.spotify,
+          el.track.uri
+        )
+      })
+    }
+    resetPlTab()
+  })
+  DOMInputs.playlistTracks.addEventListener("click", async (e) => {
+    const token = sessionStorage.getItem("accessTok")
+    const trackURI = e.target.id
+    console.log(trackURI)
+    sessionStorage.setItem("trackURI", trackURI)
+    function delItfromPlIt() {
+      console.log("Finale:", sessionStorage.getItem("trackInPl"))
+      APICtrl.deleteItemFromPlaylist(token, trackURI)
+      console.log("fraht")
+      UICtrl.ItemDeletedFromPlaylist(trackURI)
+      sessionStorage.setItem("trackInPl", "false")
+    }
+    delItfromPlIt()
+    async function resetPlTab() {
+      document.querySelector("#playlisttracks").innerHTML = ""
+      const token = sessionStorage.getItem("accessTok")
+      const trackURI = e.target.id
+      const playlistItems = await APICtrl.getPlaylistItems(token)
+      console.log(playlistItems.items)
+      sessionStorage.setItem("trackURI", trackURI)
+      const arrPlaylistTracks = Array.from(playlistItems.items)
+      arrPlaylistTracks.forEach((el) => {
+        let artists = ""
+        for (var i = 0; i < el.track.artists.length; i++) {
+          if (i == 0) {
+            artists = artists + el.track.artists[i].name
+          } else {
+            artists = artists + ", " + el.track.artists[i].name
+          }
+        }
+        UICtrl.loadItemsFromPlaylist(
+          el.track.album.images[2].url,
+          el.track.name,
+          artists,
+          el.track.external_urls.spotify,
+          el.track.uri
+        )
+      })
+    }
+    setTimeout(() => resetPlTab(), 100)
+  })
+  document.addEventListener("mouseup", function (e) {
+    var container = document.getElementById("playlisttab")
+    if (!container.contains(e.target)) {
+      ple = document.getElementById("playlisttab")
+      ple.style.right = "-100vh"
+    }
+  })
   DOMInputs.trackInfo.addEventListener("click", async (e) => {
     const token = sessionStorage.getItem("accessTok")
     const trackURI = e.target.id
@@ -91650,7 +91776,7 @@ const APPController = (function (UICtrl, APICtrl) {
           }
         }
 
-        setTimeout(() => checkPl(), 500)
+        setTimeout(() => checkPl(), 100)
       }
     }
     delItfromPl()
@@ -91802,6 +91928,7 @@ const APPController = (function (UICtrl, APICtrl) {
           sessionStorage.getItem("accessTok")
         )
         console.log(user)
+        sessionStorage.setItem("userCountry", user.country)
         UICtrl.createUser(user.images[0].url, user.display_name, user)
       }
       async function plal() {
